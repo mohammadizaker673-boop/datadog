@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Business Data System{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Business Data Management Dashboard</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Businesses</h3>
+            <p class="stat-number">{{ stats.total_businesses }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active Businesses</h3>
+            <p class="stat-number">{{ stats.active_businesses }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Research Records</h3>
+            <p class="stat-number">{{ stats.total_research }}</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Recent Businesses</h2>
+            <a href="/business/new" class="btn btn-primary">Add New Business</a>
+        </div>
+        
+        {% if businesses %}
+        <div class="business-list">
+            {% for business in businesses %}
+            <div class="business-card">
+                <div class="business-header">
+                    <h3><a href="/business/{{ business.id }}">{{ business.name }}</a></h3>
+                    <span class="badge badge-{{ business.status }}">{{ business.status }}</span>
+                </div>
+                {% if business.industry %}
+                <p class="business-industry">{{ business.industry }}</p>
+                {% endif %}
+                {% if business.description %}
+                <p class="business-description">{{ business.description[:200] }}{% if business.description|length > 200 %}...{% endif %}</p>
+                {% endif %}
+                <div class="business-meta">
+                    {% if business.location %}
+                    <span>📍 {{ business.location }}</span>
+                    {% endif %}
+                    <span>Created: {{ business.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No businesses yet. <a href="/business/new">Add your first business</a> to get started.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
