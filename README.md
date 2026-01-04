@@ -44,6 +44,10 @@ pip install -r requirements.txt
 
 3. Run the application:
 ```bash
+# For development (with debug mode):
+FLASK_DEBUG=true python app.py
+
+# For production (without debug mode):
 python app.py
 ```
 
@@ -207,11 +211,12 @@ python app.py
 
 ## Security Notes
 
-- Change the `SECRET_KEY` in production by setting the `SECRET_KEY` environment variable
-- Use a production-grade database (PostgreSQL, MySQL) for production deployments
-- Implement authentication and authorization for production use
-- Use HTTPS in production
-- Validate and sanitize all user inputs
+- **Debug Mode**: Debug mode is disabled by default. Only enable it in development by setting `FLASK_DEBUG=true`. Never use debug mode in production as it can allow arbitrary code execution.
+- **Secret Key**: Change the `SECRET_KEY` in production by setting the `SECRET_KEY` environment variable
+- **Database**: Use a production-grade database (PostgreSQL, MySQL) for production deployments
+- **Authentication**: Implement authentication and authorization for production use
+- **HTTPS**: Use HTTPS in production
+- **Input Validation**: Validate and sanitize all user inputs
 
 ## License
 

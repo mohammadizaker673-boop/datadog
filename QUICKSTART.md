@@ -32,6 +32,10 @@ This creates 5 sample businesses and 5 research records to help you explore the 
 ### 3. Start the Application
 
 ```bash
+# For development with debug mode (helpful error messages):
+FLASK_DEBUG=true python app.py
+
+# Or for production mode (more secure):
 python app.py
 ```
 
