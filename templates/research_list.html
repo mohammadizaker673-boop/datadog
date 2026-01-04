@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Research Records - Business Data System{% endblock %}
+
+{% block content %}
+<div class="research-page">
+    <h1>Research Records</h1>
+    
+    {% if records %}
+    <div class="research-list">
+        {% for record in records %}
+        <div class="research-card">
+            <h3>{{ record.title }}</h3>
+            <p class="business-name">
+                <a href="/business/{{ record.business_id }}">{{ record.business.name }}</a>
+            </p>
+            {% if record.category %}
+            <span class="badge">{{ record.category }}</span>
+            {% endif %}
+            {% if record.content %}
+            <p>{{ record.content[:200] }}{% if record.content|length > 200 %}...{% endif %}</p>
+            {% endif %}
+            <div class="research-meta">
+                {% if record.researcher %}
+                <span>Researcher: {{ record.researcher }}</span>
+                {% endif %}
+                <span>{{ record.created_at.strftime('%Y-%m-%d') }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No research records yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

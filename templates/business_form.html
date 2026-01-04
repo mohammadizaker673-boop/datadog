@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ business.name if business else 'New Business' }} - Business Data System{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>{% if business %}Edit Business{% else %}New Business{% endif %}</h1>
+    
+    <form id="businessForm" class="business-form">
+        <div class="form-group">
+            <label for="name">Business Name *</label>
+            <input type="text" id="name" name="name" required value="{{ business.name if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="industry">Industry</label>
+            <input type="text" id="industry" name="industry" value="{{ business.industry if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4">{{ business.description if business else '' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" value="{{ business.location if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="contact_email">Contact Email</label>
+            <input type="email" id="contact_email" name="contact_email" value="{{ business.contact_email if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="contact_phone">Contact Phone</label>
+            <input type="tel" id="contact_phone" name="contact_phone" value="{{ business.contact_phone if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="website">Website</label>
+            <input type="url" id="website" name="website" value="{{ business.website if business else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="active" {% if business and business.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if business and business.status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{% if business %}Update{% else %}Create{% endif %} Business</button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('businessForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('name').value,
+        industry: document.getElementById('industry').value,
+        description: document.getElementById('description').value,
+        location: document.getElementById('location').value,
+        contact_email: document.getElementById('contact_email').value,
+        contact_phone: document.getElementById('contact_phone').value,
+        website: document.getElementById('website').value,
+        status: document.getElementById('status').value
+    };
+    
+    try {
+        const url = {% if business %}'/api/businesses/{{ business.id }}'{% else %}'/api/businesses'{% endif %};
+        const method = {% if business %}'PUT'{% else %}'POST'{% endif %};
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            window.location.href = '/business/' + data.id;
+        } else {
+            const error = await response.json();
+            alert('Error: ' + (error.error || 'Failed to save business'));
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

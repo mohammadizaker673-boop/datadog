@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Business Data System{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <h1>Search Businesses</h1>
+    
+    <form class="search-form" method="get" action="/search">
+        <input type="text" name="q" placeholder="Search by name, industry, description, or location..." value="{{ query }}" autofocus>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    
+    {% if query %}
+    <div class="search-results">
+        <h2>Results for "{{ query }}"</h2>
+        
+        {% if results %}
+        <p>Found {{ results|length }} result(s)</p>
+        
+        <div class="business-list">
+            {% for business in results %}
+            <div class="business-card">
+                <div class="business-header">
+                    <h3><a href="/business/{{ business.id }}">{{ business.name }}</a></h3>
+                    <span class="badge badge-{{ business.status }}">{{ business.status }}</span>
+                </div>
+                {% if business.industry %}
+                <p class="business-industry">{{ business.industry }}</p>
+                {% endif %}
+                {% if business.description %}
+                <p class="business-description">{{ business.description[:200] }}{% if business.description|length > 200 %}...{% endif %}</p>
+                {% endif %}
+                <div class="business-meta">
+                    {% if business.location %}
+                    <span>📍 {{ business.location }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No results found for "{{ query }}"</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}{{ business.name }} - Business Data System{% endblock %}
+
+{% block content %}
+<div class="business-detail">
+    <div class="detail-header">
+        <div>
+            <h1>{{ business.name }}</h1>
+            <span class="badge badge-{{ business.status }}">{{ business.status }}</span>
+        </div>
+        <div class="actions">
+            <a href="/business/{{ business.id }}/edit" class="btn btn-primary">Edit</a>
+            <button onclick="deleteBusiness({{ business.id }})" class="btn btn-danger">Delete</button>
+        </div>
+    </div>
+    
+    <div class="detail-content">
+        <section class="info-section">
+            <h2>Business Information</h2>
+            <div class="info-grid">
+                {% if business.industry %}
+                <div class="info-item">
+                    <strong>Industry:</strong>
+                    <span>{{ business.industry }}</span>
+                </div>
+                {% endif %}
+                
+                {% if business.location %}
+                <div class="info-item">
+                    <strong>Location:</strong>
+                    <span>{{ business.location }}</span>
+                </div>
+                {% endif %}
+                
+                {% if business.contact_email %}
+                <div class="info-item">
+                    <strong>Email:</strong>
+                    <span><a href="mailto:{{ business.contact_email }}">{{ business.contact_email }}</a></span>
+                </div>
+                {% endif %}
+                
+                {% if business.contact_phone %}
+                <div class="info-item">
+                    <strong>Phone:</strong>
+                    <span>{{ business.contact_phone }}</span>
+                </div>
+                {% endif %}
+                
+                {% if business.website %}
+                <div class="info-item">
+                    <strong>Website:</strong>
+                    <span><a href="{{ business.website }}" target="_blank">{{ business.website }}</a></span>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <strong>Created:</strong>
+                    <span>{{ business.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <strong>Last Updated:</strong>
+                    <span>{{ business.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </div>
+            
+            {% if business.description %}
+            <div class="description">
+                <strong>Description:</strong>
+                <p>{{ business.description }}</p>
+            </div>
+            {% endif %}
+        </section>
+        
+        <section class="research-section">
+            <div class="section-header">
+                <h2>Research Records</h2>
+                <button onclick="showResearchForm()" class="btn btn-primary">Add Research</button>
+            </div>
+            
+            {% if research_records %}
+            <div class="research-list">
+                {% for record in research_records %}
+                <div class="research-card">
+                    <h3>{{ record.title }}</h3>
+                    {% if record.category %}
+                    <span class="badge">{{ record.category }}</span>
+                    {% endif %}
+                    {% if record.content %}
+                    <p>{{ record.content }}</p>
+                    {% endif %}
+                    {% if record.findings %}
+                    <div class="findings">
+                        <strong>Findings:</strong>
+                        <p>{{ record.findings }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="research-meta">
+                        {% if record.researcher %}
+                        <span>Researcher: {{ record.researcher }}</span>
+                        {% endif %}
+                        <span>{{ record.created_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No research records yet.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<div id="researchModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeResearchForm()">&times;</span>
+        <h2>Add Research Record</h2>
+        <form id="researchForm">
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category">
+            </div>
+            
+            <div class="form-group">
+                <label for="researcher">Researcher</label>
+                <input type="text" id="researcher" name="researcher">
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" rows="4"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="findings">Findings</label>
+                <textarea id="findings" name="findings" rows="4"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Research</button>
+                <button type="button" onclick="closeResearchForm()" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showResearchForm() {
+    document.getElementById('researchModal').style.display = 'block';
+}
+
+function closeResearchForm() {
+    document.getElementById('researchModal').style.display = 'none';
+    document.getElementById('researchForm').reset();
+}
+
+document.getElementById('researchForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        business_id: {{ business.id }},
+        title: document.getElementById('title').value,
+        category: document.getElementById('category').value,
+        researcher: document.getElementById('researcher').value,
+        content: document.getElementById('content').value,
+        findings: document.getElementById('findings').value
+    };
+    
+    try {
+        const response = await fetch('/api/research', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert('Error: ' + (error.error || 'Failed to add research'));
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+
+async function deleteBusiness(id) {
+    if (!confirm('Are you sure you want to delete this business? This will also delete all associated research records.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/businesses/' + id, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            window.location.href = '/';
+        } else {
+            const error = await response.json();
+            alert('Error: ' + (error.error || 'Failed to delete business'));
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
